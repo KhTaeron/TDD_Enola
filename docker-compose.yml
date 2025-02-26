@@ -17,6 +17,18 @@ services:
     networks:
       - library_network
 
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: library_php
+    volumes:
+      - .:/var/www
+    depends_on:
+      - db
+    networks:
+      - library_network
+
 networks:
   library_network:
     driver: bridge
