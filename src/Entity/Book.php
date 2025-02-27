@@ -32,6 +32,14 @@ class Book
     #[ORM\Column(type: 'boolean')]
     private bool $available = true;
 
+    public function __construct(?string $isbn = null)
+    {
+        if ($isbn === null) {
+            throw new \InvalidArgumentException("L'ISBN est obligatoire.");
+        }
+        $this->setIsbn($isbn);
+    }
+
     public function validateFields(): void
     {
         if (empty($this->isbn) || empty($this->title) || empty($this->author) || empty($this->publisher) || empty($this->format)) {
@@ -65,9 +73,6 @@ class Book
 
     public function setTitle(string $title): void
     {
-        if (empty($title)) {
-            throw new \InvalidArgumentException("Le titre est obligatoire.");
-        }
         $this->title = $title;
     }
 
@@ -78,9 +83,6 @@ class Book
 
     public function setAuthor(string $author): void
     {
-        if (empty($author)) {
-            throw new \InvalidArgumentException("L'auteur est obligatoire.");
-        }
         $this->author = $author;
     }
 
@@ -91,9 +93,7 @@ class Book
 
     public function setPublisher(string $publisher): void
     {
-        if (empty($publisher)) {
-            throw new \InvalidArgumentException("L'éditeur est obligatoire.");
-        }
+
         $this->publisher = $publisher;
     }
 
@@ -104,7 +104,7 @@ class Book
 
     public function setFormat(string $format): void
     {
-        $validFormats = ['Poche', 'Broché', 'Grand format'];
+        $validFormats = ['Poche', 'Broché', 'Grand format', 'Inconnu'];
         if (!in_array($format, $validFormats)) {
             throw new \InvalidArgumentException("Format invalide.");
         }

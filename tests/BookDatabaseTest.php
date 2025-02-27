@@ -3,6 +3,8 @@
 namespace App\Tests;
 
 use App\Entity\Book;
+use App\Service\BookService;
+use App\Service\WebService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -30,22 +32,22 @@ class BookDatabaseTest extends KernelTestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("L'ISBN est obligatoire.");
 
-        $book = new Book();
-        $book->setTitle('Test Book');
-        $book->setAuthor('John Doe');
-        $book->setPublisher('Test Publisher');
+        $book = new Book();  // Pas d'ISBN
+        $book->setTitle('Some title');
+        $book->setAuthor('Some author');
+        $book->setPublisher('Some publisher');
         $book->setFormat('Poche');
         $book->setAvailable(true);
 
-        // Tenter de persister le livre sans ISBN
+        // Maintenant qu'on a validé, si on insère, on est sûr qu'on n'a pas d'erreur SQL
         $this->entityManager->persist($book);
         $this->entityManager->flush();
     }
 
+
     public function testBookCreationInDB_AllFields(): void
     {
-        $book = new Book();
-        $book->setIsbn('978-2755673135');
+        $book = new Book('978-2755673135');
         $book->setTitle('Fourth Wing');
         $book->setAuthor('Rebecca Yarros');
         $book->setPublisher('Hugo Roman');
@@ -71,23 +73,35 @@ class BookDatabaseTest extends KernelTestCase
     // Complétion des champs manquants si ISBN remplis mais pas autres champs
     public function testBookCreationInDBWithMissingFields_ShouldFetchDataFromWebService(): void
     {
-        $book = new Book();
-        $book->setIsbn('978-2755673135');
+        $book = new Book('978-2755673135');
         $book->setTitle('');
         $book->setAuthor('');
         $book->setPublisher('');
-        $book->setFormat('');
+        $book->setFormat('Inconnu');
         $book->setAvailable(true);
 
-        // Simuler l'appel au web service
-        $this->mockWebServiceToCompleteBook($book);
+        // Mock du Web Service
+        $webServiceMock = $this->createMock(WebService::class);
+        $webServiceMock->method('fetchBookDetailsByIsbn')
+            ->willReturn([
+                'title' => 'Troublemaker',
+                'author' => 'Laura Swan',
+                'publisher' => 'Hachette',
+                'format' => 'Broché'
+            ]);
 
-        // Vérification que les champs ont été complétés par le web service
-        $this->assertNotEmpty($book->getTitle());
-        $this->assertNotEmpty($book->getAuthor());
-        $this->assertNotEmpty($book->getPublisher());
-        $this->assertNotEmpty($book->getFormat());
+        // Créer une instance du service avec le mock du web service
+        $bookService = new BookService($webServiceMock);
+
+        $bookService->validateAndCompleteBook($book);
+
+        // Vérification que les champs ont bien été complétés par le web service
+        $this->assertEquals('Troublemaker', $book->getTitle());
+        $this->assertEquals('Laura Swan', $book->getAuthor());
+        $this->assertEquals('Hachette', $book->getPublisher());
+        $this->assertEquals('Broché', $book->getFormat());
     }
+
 
     protected function tearDown(): void
     {

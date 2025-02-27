@@ -65,7 +65,7 @@ class BookTest extends TestCase
         $book->setTitle('Fourth Wing');
         $book->setAuthor('Rebecca Yarros');
         $book->setPublisher('Hugo Roman');
-        $book->setFormat('Inconnu'); // Format invalide
+        $book->setFormat(''); // Format invalide
         $book->setAvailable(true);
     }
 }
