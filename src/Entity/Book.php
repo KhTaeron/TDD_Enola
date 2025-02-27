@@ -32,12 +32,7 @@ class Book
     #[ORM\Column(type: 'boolean')]
     private bool $available = true;
 
-    public function __construct()
-    {
-        $this->validate();
-    }
-
-    public function validate(): void
+    public function validateFields(): void
     {
         if (empty($this->isbn) || empty($this->title) || empty($this->author) || empty($this->publisher) || empty($this->format)) {
             throw new \InvalidArgumentException("Tous les champs du livre doivent être remplis.");
@@ -54,12 +49,12 @@ class Book
         if (empty($isbn)) {
             throw new \InvalidArgumentException("L'ISBN est obligatoire.");
         }
-        $normalizedIsbn = str_replace('-', '', $isbn); // Supprime les tirets avant de stocker
+        $normalizedIsbn = str_replace('-', '', $isbn); // Supprime les tirets avant de tester l'isbn
 
         if (!ISBNValidator::validate($normalizedIsbn)) {
             throw new \InvalidArgumentException("ISBN invalide.");
         }
-        $this->isbn = $normalizedIsbn;
+        $this->isbn = $isbn;
     }
 
 
