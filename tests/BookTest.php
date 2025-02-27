@@ -17,7 +17,7 @@ class BookTest extends TestCase
         $book->setFormat('Broché');
         $book->setAvailable(true);
 
-        $this->assertEquals('978-2755673135', $book->getIsbn());
+        $this->assertEquals('9782755673135', $book->getIsbn());
         $this->assertEquals('Fourth Wing', $book->getTitle());
         $this->assertEquals('Rebecca Yarros', $book->getAuthor());
         $this->assertEquals('Hugo Roman', $book->getPublisher());
@@ -25,20 +25,35 @@ class BookTest extends TestCase
         $this->assertTrue($book->isAvailable());
     }
 
+    public function testBookCreation_ValidIsbn()
+    {
+        $book = new Book();
+        $book->setIsbn('9783161484100'); // ISBN 13 valide
+        $this->assertEquals('9783161484100', $book->getIsbn());
+    }
+
     public function testBookCreation_InvalidIsbn()
     {
         $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("ISBN invalide.");
 
         $book = new Book();
-        $book->setIsbn('1234'); // ISBN invalide
+        $book->setIsbn('1234567890'); // ISBN invalide
     }
 
+    public function testBookCreation_IsbnWithDashes()
+    {
+        $book = new Book();
+        $book->setIsbn('978-3-16-148410-0'); 
+        $this->assertEquals('9783161484100', $book->getIsbn()); 
+    }
+    
     public function testBookCreation_MissingFields()
     {
         $this->expectException(\InvalidArgumentException::class);
 
         $book = new Book();
-        $book->setIsbn('978-2755673135'); 
+        $book->setIsbn('978-2755673135');
     }
 
     public function testBookCreation_InvalidFormat()

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\BookRepository;
+use App\Validator\ISBNValidator;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
@@ -31,6 +32,18 @@ class Book
     #[ORM\Column(type: 'boolean')]
     private bool $available = true;
 
+    public function __construct()
+    {
+        $this->validate();
+    }
+
+    public function validate(): void
+    {
+        if (empty($this->isbn) || empty($this->title) || empty($this->author) || empty($this->publisher) || empty($this->format)) {
+            throw new \InvalidArgumentException("Tous les champs du livre doivent être remplis.");
+        }
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -38,11 +51,17 @@ class Book
 
     public function setIsbn(string $isbn): void
     {
-        if (!preg_match('/^\d{3}-\d{1,5}-\d{1,7}-\d{1,7}-\d{1}$/', $isbn)) {
+        if (empty($isbn)) {
+            throw new \InvalidArgumentException("L'ISBN est obligatoire.");
+        }
+        $normalizedIsbn = str_replace('-', '', $isbn); // Supprime les tirets avant de stocker
+
+        if (!ISBNValidator::validate($normalizedIsbn)) {
             throw new \InvalidArgumentException("ISBN invalide.");
         }
-        $this->isbn = $isbn;
+        $this->isbn = $normalizedIsbn;
     }
+
 
     public function getIsbn(): string
     {
