@@ -25,7 +25,7 @@ class BookDatabaseTest extends KernelTestCase
         $schemaTool->createSchema($classes);
     }
 
-    public function testBookCreationInDB_WithMissingFields(): void
+    public function testBookCreationInDBWithMissingIsbn_ShouldThrowException(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage("L'ISBN est obligatoire.");
@@ -66,6 +66,27 @@ class BookDatabaseTest extends KernelTestCase
         $this->assertEquals('Hugo Roman', $savedBook->getPublisher());
         $this->assertEquals('Broché', $savedBook->getFormat());
         $this->assertTrue($savedBook->isAvailable());
+    }
+
+    // Complétion des champs manquants si ISBN remplis mais pas autres champs
+    public function testBookCreationInDBWithMissingFields_ShouldFetchDataFromWebService(): void
+    {
+        $book = new Book();
+        $book->setIsbn('978-2755673135');
+        $book->setTitle('');
+        $book->setAuthor('');
+        $book->setPublisher('');
+        $book->setFormat('');
+        $book->setAvailable(true);
+
+        // Simuler l'appel au web service
+        $this->mockWebServiceToCompleteBook($book);
+
+        // Vérification que les champs ont été complétés par le web service
+        $this->assertNotEmpty($book->getTitle());
+        $this->assertNotEmpty($book->getAuthor());
+        $this->assertNotEmpty($book->getPublisher());
+        $this->assertNotEmpty($book->getFormat());
     }
 
     protected function tearDown(): void
