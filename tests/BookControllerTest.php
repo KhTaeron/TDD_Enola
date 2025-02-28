@@ -73,4 +73,45 @@ class BookControllerTest extends WebTestCase
         $this->assertResponseStatusCodeSame(404); // 404 : non trouvé
     }
 
+    public function testBookController_SearchByIsbn(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/api/books/search?isbn=978-2755673159');
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJson($client->getResponse()->getContent());
+
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertNotEmpty($data);
+        $this->assertSame("978-2755673159", $data[0]['isbn']);
+    }
+
+    public function testBookController_SearchByTitle(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/api/books/search?title=Onyx+Storm');
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJson($client->getResponse()->getContent());
+
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertNotEmpty($data);
+        $this->assertStringContainsString("Onyx Storm", $data[0]['title']);
+    }
+
+    public function testBookController_SearchByAuthor(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/api/books/search?author=Rebecca+Yarros');
+
+        $this->assertResponseStatusCodeSame(200);
+        $this->assertJson($client->getResponse()->getContent());
+
+        $data = json_decode($client->getResponse()->getContent(), true);
+        $this->assertNotEmpty($data);
+        $this->assertStringContainsString("Rebecca Yarros", $data[0]['author']);
+    }
 }
