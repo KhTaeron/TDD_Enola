@@ -2,8 +2,8 @@
 
 namespace App\Tests\SubscribersTests;
 
+use App\Entity\Reservation;
 use DateTime;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use App\Entity\Subscriber;
 
