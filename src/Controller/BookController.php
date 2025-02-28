@@ -58,5 +58,47 @@ class BookController extends AbstractController
         return $this->json($book);
     }
 
-    
+    #[Route('/{id}', methods: ['PUT'])]
+    public function updateBook(int $id, Request $request): JsonResponse
+    {
+        $book = $this->entityManager->getRepository(Book::class)->find($id);
+
+        if (!$book) {
+            return $this->json(['error' => 'Livre non trouvé'], 404);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (isset($data['isbn']))
+            $book->setIsbn($data['isbn']);
+        if (isset($data['title']))
+            $book->setTitle($data['title']);
+        if (isset($data['author']))
+            $book->setAuthor($data['author']);
+        if (isset($data['publisher']))
+            $book->setPublisher($data['publisher']);
+        if (isset($data['format']))
+            $book->setFormat($data['format']);
+        if (isset($data['available']))
+            $book->setAvailable($data['available']);
+
+        $this->entityManager->flush();
+
+        return $this->json($book);
+    }
+
+    #[Route('/{id}', methods: ['DELETE'])]
+    public function deleteBook(int $id): JsonResponse
+    {
+        $book = $this->entityManager->getRepository(Book::class)->find($id);
+
+        if (!$book) {
+            return $this->json(['error' => 'Livre non trouvé'], 404);
+        }
+
+        $this->entityManager->remove($book);
+        $this->entityManager->flush();
+
+        return $this->json(['message' => 'Livre supprimé'], 204);
+    }
 }
