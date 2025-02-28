@@ -7,6 +7,7 @@ use App\Repository\ReservationRepository;
 use App\Service\ReservationService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ReservationServiceTest extends WebTestCase
@@ -124,5 +125,43 @@ class ReservationServiceTest extends WebTestCase
 
         $this->assertCount(5, $reservations, "L'historique doit contenir 5 réservations.");
     }
+
+    public function testReservationWithExpirationDateExceeding4Months(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("La date limite de réservation ne peut pas dépasser 4 mois à partir du jour de la réservation.");
+
+        $subscriber = new Subscriber();
+        $subscriber->setCode((string) random_int(1000, 99999));
+        $subscriber->setLastname('Dupont');
+        $subscriber->setFirstname('Jean');
+        $subscriber->setBirthdate('01-01-1990');
+        $subscriber->setCivilite('M');
+
+        $this->entityManager->persist($subscriber);
+        $this->entityManager->flush();
+
+        // Créer une réservation avec une date limite au-delà de 4 mois
+        new Reservation($subscriber, (new DateTime())->add(new \DateInterval('P5M')));
+    }
+
+    public function testReservationWithValidExpirationDate(): void
+    {
+        $subscriber = new Subscriber();
+        $subscriber->setCode((string) random_int(1000, 99999));
+        $subscriber->setLastname('Dupont');
+        $subscriber->setFirstname('Jean');
+        $subscriber->setBirthdate('01-01-1990');
+        $subscriber->setCivilite('M');
+
+        $this->entityManager->persist($subscriber);
+        $this->entityManager->flush();
+
+        // Créer une réservation avec une date limite dans les 4 mois
+        $reservation = new Reservation($subscriber, (new DateTime())->add(new \DateInterval('P3M')));
+
+        $this->assertInstanceOf(Reservation::class, $reservation);
+    }
+
 
 }
