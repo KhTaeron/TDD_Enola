@@ -11,10 +11,13 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'subscribers')]
 class Subscriber
 {
-    #[Groups(['subscriber:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "AUTO")]
-    #[ORM\Column(type: "string", unique: true)]
+    #[ORM\Column(type: "integer", unique: true)]
+    private ?int $id = null;
+
+    #[Groups(['subscriber:read'])]
+    #[ORM\Column(length: 20, unique: true)]
     private string $code;
 
     #[Groups(['subscriber:read'])]
@@ -32,6 +35,22 @@ class Subscriber
     #[Groups(['subscriber:read'])]
     #[ORM\Column(length: 10)]
     private string $civilite;
+
+    public function validate(): void
+    {
+        if (empty($this->code)) {
+            throw new InvalidArgumentException("Le code de l'adhérent est obligatoire.");
+        }
+        if (empty($this->firstname)) {
+            throw new InvalidArgumentException("Le prénom est obligatoire.");
+        }
+        if (empty($this->lastname)) {
+            throw new InvalidArgumentException("Le nom est obligatoire.");
+        }
+        if (empty($this->civilite)) {
+            throw new InvalidArgumentException("La civilité est obligatoire.");
+        }
+    }
 
     public function getCode(): string
     {
