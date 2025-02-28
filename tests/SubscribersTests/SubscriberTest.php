@@ -2,6 +2,7 @@
 
 namespace App\Tests\SubscribersTests;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use App\Entity\Subscriber;
 
@@ -31,7 +32,7 @@ class SubscriberTest extends TestCase
         $subscriber->setCode('9785');
         $subscriber->setLastname('Dupont');
         $subscriber->setFirstname('Jean');
-        $subscriber->setBirthdate('10-10-1990'); 
+        $subscriber->setBirthdate('10-10-1990');
         $subscriber->setCivilite('M');
 
         // Assertions
@@ -57,4 +58,69 @@ class SubscriberTest extends TestCase
         $subscriber->setCivilite('M');
     }
 
+    public function testSubscriberCreationWithMissingCode_ShouldThrowException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Le code de l'adhérent est obligatoire.");
+
+        // Créer un abonné sans code
+        $subscriber = new Subscriber();
+        $subscriber->setLastname('Dupont');
+        $subscriber->setFirstname('Jean');
+        $subscriber->setBirthdate('01-01-1990');
+        $subscriber->setCivilite('M');
+
+        // Tester l'exception lors de la tentative de création sans code
+        $subscriber->setCode('');
+    }
+
+    public function testSubscriberCreationWithMissingLastname_ShouldThrowException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Le nom est obligatoire.");
+
+        // Créer un abonné sans nom
+        $subscriber = new Subscriber();
+        $subscriber->setCode('9785');
+        $subscriber->setFirstname('Jean');
+        $subscriber->setBirthdate('01-01-1990');
+        $subscriber->setCivilite('M');
+
+        // Tester l'exception lors de la tentative de création sans nom
+        $subscriber->setLastname('');
+    }
+
+    public function testSubscriberCreationWithMissingFirstname_ShouldThrowException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Le prénom est obligatoire.");
+
+        // Créer un abonné sans prénom
+        $subscriber = new Subscriber();
+        $subscriber->setCode('9785');
+        $subscriber->setLastname('Dupont');
+        $subscriber->setBirthdate('01-01-1990');
+        $subscriber->setCivilite('M');
+
+        // Tester l'exception lors de la tentative de création sans prénom
+        $subscriber->setFirstname('');
+    }
+
+    public function testSubscriberCreationWithInvalidCivilite_ShouldThrowException()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("La civilité doit être 'M', 'Mme', ou 'Mlle'.");
+
+        // Créer un abonné avec une civilité invalide
+        $subscriber = new Subscriber();
+        $subscriber->setCode('9785');
+        $subscriber->setLastname('Dupont');
+        $subscriber->setFirstname('Jean');
+        $subscriber->setBirthdate('01-01-1990');
+
+        // Tester l'exception lors de la tentative de création avec une civilité invalide
+        $subscriber->setCivilite('Mr');
+    }
 }
+
+
