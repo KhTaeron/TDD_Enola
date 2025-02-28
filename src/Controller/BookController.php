@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Entity\Book;
+use App\Repository\BookRepository;
 use App\Service\BookService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -44,6 +45,38 @@ class BookController extends AbstractController
         } catch (\Exception $e) {
             return $this->json(['error' => $e->getMessage()], 400);
         }
+    }
+
+    #[Route('/search', name: 'search', methods: ['GET'])]
+    public function searchBooks(Request $request, BookRepository $bookRepository): JsonResponse
+    {
+        $isbn = $request->query->get('isbn');
+        $title = $request->query->get('title');
+        $author = $request->query->get('author');
+
+        if ($isbn) {
+            $books = $bookRepository->findBy(['isbn' => $isbn]);
+        } elseif ($title) {
+            $books = $bookRepository->createQueryBuilder('b')
+                ->where('b.title LIKE :title')
+                ->setParameter('title', "%$title%")
+                ->getQuery()
+                ->getResult();
+        } elseif ($author) {
+            $books = $bookRepository->createQueryBuilder('b')
+                ->where('b.author LIKE :author')
+                ->setParameter('author', "%$author%")
+                ->getQuery()
+                ->getResult();
+        } else {
+            return $this->json(['error' => 'Veuillez fournir un critère de recherche.'], 400);
+        }
+
+        if (!$books) {
+            return $this->json(['error' => 'Aucun livre trouvé.'], 404);
+        }
+
+        return $this->json($books, 200, [], ['groups' => 'book:read']);
     }
 
     #[Route('/{id}', methods: ['GET'])]
@@ -101,4 +134,6 @@ class BookController extends AbstractController
 
         return $this->json(['message' => 'Livre supprimé'], 204);
     }
+
+
 }

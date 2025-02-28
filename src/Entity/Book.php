@@ -5,21 +5,26 @@ namespace App\Entity;
 use App\Repository\BookRepository;
 use App\Validator\ISBNValidator;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BookRepository::class)]
 class Book
 {
+    #[Groups(['book:read'])]
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
+    #[Groups(['book:read'])]
     #[ORM\Column(length: 20, unique: true)]
     private string $isbn;
 
+    #[Groups(['book:read'])]
     #[ORM\Column(length: 255)]
     private string $title;
 
+    #[Groups(['book:read'])]
     #[ORM\Column(length: 255)]
     private string $author;
 
