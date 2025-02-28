@@ -102,7 +102,36 @@ class BookDatabaseTest extends KernelTestCase
         $this->assertEquals('Broché', $book->getFormat());
     }
 
-
+    public function testBookCreationInDB_WithDuplicateIsbn_ShouldThrowException(): void
+    {
+        $book1 = new Book('978-2755673135');
+        $book1->setTitle('Fourth Wing');
+        $book1->setAuthor('Rebecca Yarros');
+        $book1->setPublisher('Hugo Roman');
+        $book1->setFormat('Broché');
+        $book1->setAvailable(true);
+    
+        // Persister le premier livre
+        $this->entityManager->persist($book1);
+        $this->entityManager->flush();
+    
+        // Créer un deuxième livre avec le même ISBN
+        $book2 = new Book('978-2755673135');
+        $book2->setTitle('Livre dupliqué');
+        $book2->setAuthor('Rebecca Yarros');
+        $book2->setPublisher('Hugo Roman');
+        $book2->setFormat('Broché');
+        $book2->setAvailable(true);
+    
+        // Exception pour le duplicata
+        $this->expectException(\Doctrine\DBAL\Exception\UniqueConstraintViolationException::class);
+        $this->expectExceptionMessage('Duplicate entry');
+    
+        // Essayer d'ajouter le deuxième livre avec le même ISBN
+        $this->entityManager->persist($book2);
+        $this->entityManager->flush();
+    }
+    
     protected function tearDown(): void
     {
         $conn = static::getContainer()->get('doctrine')->getConnection();
