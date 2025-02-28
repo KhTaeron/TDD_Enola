@@ -15,14 +15,14 @@ class SubscriberTest extends TestCase
         $subscriber->setCode('9785');
         $subscriber->setLastname('Dupont');
         $subscriber->setFirstname('Jean');
-        $subscriber->setBirthdate(new \DateTime('1990-01-01'));
+        $subscriber->setBirthdate('01-01-1990');
         $subscriber->setCivilite('M');
 
         // Vérification des valeurs
         $this->assertEquals('9785', $subscriber->getCode());
         $this->assertEquals('Dupont', $subscriber->getLastname());
         $this->assertEquals('Jean', $subscriber->getFirstname());
-        $this->assertEquals('1990-01-01', $subscriber->getBirthdate()->format('Y-m-d'));
+        $this->assertEquals('01-01-1990', $subscriber->getBirthdate()->format('d-m-Y'));
         $this->assertEquals('M', $subscriber->getCivilite());
     }
 
@@ -40,13 +40,13 @@ class SubscriberTest extends TestCase
         $this->assertEquals('Dupont', $subscriber->getLastname());
         $this->assertEquals('Jean', $subscriber->getFirstname());
         $this->assertInstanceOf(\DateTimeInterface::class, $subscriber->getBirthdate());
-        $this->assertEquals('1990-10-10', $subscriber->getBirthdate()->format('Y-m-d'));  // On vérifie le format
+        $this->assertEquals('10-10-1990', $subscriber->getBirthdate()->format('d-m-Y'));
         $this->assertEquals('M', $subscriber->getCivilite());
     }
 
     public function testSubscriberCreationWithInvalidBirthdate_ShouldThrowException()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("La date doit être au format 'dd-mm-yyyy'.");
 
         $subscriber = new Subscriber();
@@ -54,7 +54,7 @@ class SubscriberTest extends TestCase
         $subscriber->setLastname('Dupont');
         $subscriber->setFirstname('Jean');
 
-        $subscriber->setBirthdate('10/10/1990');  // Format incorrect
+        $subscriber->setBirthdate('01-32-1990');  // Format incorrect
         $subscriber->setCivilite('M');
     }
 
@@ -67,7 +67,7 @@ class SubscriberTest extends TestCase
         $subscriber = new Subscriber();
         $subscriber->setLastname('Dupont');
         $subscriber->setFirstname('Jean');
-        $subscriber->setBirthdate('01-01-1990');
+        $subscriber->setBirthdate('10-10-1990');
         $subscriber->setCivilite('M');
 
         // Tester l'exception lors de la tentative de création sans code
@@ -83,7 +83,7 @@ class SubscriberTest extends TestCase
         $subscriber = new Subscriber();
         $subscriber->setCode('9785');
         $subscriber->setFirstname('Jean');
-        $subscriber->setBirthdate('01-01-1990');
+        $subscriber->setBirthdate('10-10-1990');
         $subscriber->setCivilite('M');
 
         // Tester l'exception lors de la tentative de création sans nom
@@ -99,7 +99,7 @@ class SubscriberTest extends TestCase
         $subscriber = new Subscriber();
         $subscriber->setCode('9785');
         $subscriber->setLastname('Dupont');
-        $subscriber->setBirthdate('01-01-1990');
+        $subscriber->setBirthdate('10-10-1990');
         $subscriber->setCivilite('M');
 
         // Tester l'exception lors de la tentative de création sans prénom
@@ -116,7 +116,7 @@ class SubscriberTest extends TestCase
         $subscriber->setCode('9785');
         $subscriber->setLastname('Dupont');
         $subscriber->setFirstname('Jean');
-        $subscriber->setBirthdate('01-01-1990');
+        $subscriber->setBirthdate('10-10-1990');
 
         // Tester l'exception lors de la tentative de création avec une civilité invalide
         $subscriber->setCivilite('Mr');
