@@ -57,4 +57,24 @@ class ReservationService
         ]);
     }
 
+    public function getReservationHistory(Subscriber $subscriber)
+    {
+        return $this->entityManager->getRepository(Reservation::class)->findBy(['subscriber' => $subscriber]);
+    }
+
+    public function sendOverdueReminderEmail(Subscriber $subscriber): void
+    {
+        $reservations = $this->entityManager->getRepository(Reservation::class)->findBy([
+            'subscriber' => $subscriber,
+            'isFinished' => false
+        ]);
+
+        $overdueReservations = array_filter($reservations, function ($reservation) {
+            return $reservation->getExpirationDate() < new DateTime();
+        });
+
+        if (!empty($overdueReservations)) {
+            
+        }
+    }
 }

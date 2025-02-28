@@ -98,4 +98,31 @@ class ReservationServiceTest extends WebTestCase
         $this->assertNotEmpty($openReservations);
     }
 
+    public function testGetReservationHistoryForSubscriber(): void
+    {
+        $subscriber = new Subscriber();
+        $subscriber->setCode((string) random_int(1000, 99999));
+        $subscriber->setLastname('Dupont');
+        $subscriber->setFirstname('Jean');
+        $subscriber->setBirthdate('01-01-1990');
+        $subscriber->setCivilite('M');
+
+        $this->entityManager->persist($subscriber);
+        $this->entityManager->flush();
+
+        // Ajouter des réservations passées et présentes
+        for ($i = 0; $i < 5; $i++) {
+            $reservation = new Reservation($subscriber, new DateTime("-{$i} months"), true);
+
+            $this->entityManager->persist($reservation);
+        }
+
+        $this->entityManager->flush(); // Sauvegarde en base
+
+        // Récupérer l’historique
+        $reservations = $this->reservationService->getReservationHistory($subscriber);
+
+        $this->assertCount(5, $reservations, "L'historique doit contenir 5 réservations.");
+    }
+
 }

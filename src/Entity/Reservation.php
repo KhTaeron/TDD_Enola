@@ -29,8 +29,14 @@ class Reservation
     #[ORM\Column(type: "boolean")]
     private bool $isFinished = false;
 
-    public function __construct(Subscriber $subscriber, DateTime $reservationDate)
+    private bool $allowPast = false;
+
+    public function __construct(Subscriber $subscriber, DateTime $reservationDate, bool $allowPast = false)
     {
+        $this->subscriber = $subscriber;
+        $this->dateLimit = $reservationDate;
+        $this->allowPast = $allowPast;
+
         $this->subscriber = $subscriber;
         $this->reservationDate = $reservationDate;
         $this->setExpirationDate($reservationDate);
@@ -40,7 +46,7 @@ class Reservation
     {
         $expirationDate = clone $reservationDate;
         $expirationDate->modify('+4 months');
-        if ($expirationDate > new DateTime()) {
+        if ($expirationDate > new DateTime() || $this->allowPast) {
             $this->expirationDate = $expirationDate;
         } else {
             throw new InvalidArgumentException("La date limite de réservation ne peut pas être dans le passé.");
