@@ -9,7 +9,7 @@ class BookService
 {
     private $webService;
 
-    public function __construct($webService)
+    public function __construct(WebService $webService)
     {
         $this->webService = $webService;
     }

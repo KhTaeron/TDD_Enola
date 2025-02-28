@@ -24,6 +24,7 @@ services:
     container_name: library_php
     volumes:
       - .:/var/www
+      - ./docker/php.ini:/usr/local/etc/php/php.ini
     depends_on:
       - db
     networks:
